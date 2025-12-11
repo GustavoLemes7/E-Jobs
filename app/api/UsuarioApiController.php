@@ -58,6 +58,7 @@ if ($_GET["action"] === "listarPendentes") {
     exit;
 }
 
+// RN 06 - O Usuário Empresa deverá ser aprovado pelo Usuário Administrador.
 if ($_GET["action"] === "aprovarEmpresa") {
     $data = json_decode(file_get_contents("php://input"), true);
 
@@ -85,7 +86,7 @@ if ($_GET["action"] === "aprovarEmpresa") {
 
 
 
-
+//RN 08 - Remoções de usuários ou vagas são tratados como deleção lógica .
 if ($_GET["action"] === "alterarStatus") {
     $data = json_decode(file_get_contents("php://input"), true);
 

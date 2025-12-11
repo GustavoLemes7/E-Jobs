@@ -127,6 +127,8 @@ class CategoriaApiController
         }
     }
 
+    // RN 12 - Remoções de categorias e cargos são tratados como deleção física,
+    // mas só serão deletados caso não estiverem associados a nenhuma vaga.
     private function delete()
     {
         try {
@@ -142,6 +144,15 @@ class CategoriaApiController
             }
 
             $dao = new CategoriaDAO();
+            //Verifica se categoria está associada a alguma vaga
+            if ($dao->categoriaTemVaga($id)) {
+                echo json_encode([
+                    "success" => false,
+                    "error" => "Não é possível excluir: a categoria está associada a uma ou mais vagas."
+                ]);
+                return;
+            }
+            //deleta categoria
             $dao->deleteById($id);
 
             echo json_encode([

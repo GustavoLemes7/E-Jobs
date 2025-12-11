@@ -67,6 +67,15 @@ class CargoDAO {
         $stm->bindValue("id", $id);
         $stm->execute();
     }
+
+    public function cargoTemVaga($id) {
+        $conn = Connection::getConn();
+        $sql = "SELECT COUNT(*) AS total FROM vaga WHERE cargos_id = ?";
+        $stmt = $conn->prepare($sql);
+        $stmt->execute([$id]);
+
+        return $stmt->fetchColumn() > 0; 
+    }
     
 
     private function mapCargos($result) {

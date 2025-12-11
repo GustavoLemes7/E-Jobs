@@ -121,7 +121,9 @@ class CadastroApiController extends ApiController {
                 
             }
             if(empty($erros)){
+            // RN 02 e 03 - Verifica se CPF ou CNPJ já existe na base de dados
             $erros = array_merge($erros,$this->usuarioService->validarDocumento($usuario->getDocumento()));
+            // RN 01 - Verifica se email já existe na base de dados
             $erros = array_merge($erros,$this->usuarioService->validarEmail($usuario->getEmail()));
             }
         }

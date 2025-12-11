@@ -65,6 +65,8 @@ class VagaApiController extends ApiController
         //  $vagas = $this->vagaDao->list();
         //} else {
         // Candidato ou visitante: mostra apenas vagas ativas
+
+        // RN 07 - Apenas vagas com o status “ativo” aparecem para o Usuário Candidato 
         $vagas = $this->vagaDao->listarAtivas();
         //}
 
@@ -296,6 +298,16 @@ class VagaApiController extends ApiController
         $usuarioId = isset($input['usuarioId']) && is_numeric($input['usuarioId']) ? (int)$input['usuarioId'] : NULL;
         $empresa = $usuarioId ? $this->usuarioDao->findById($usuarioId) : null;
 
+        // RN 04 - Apenas usuários Candidatos e usuários Empresa podem acessar funcionalidades avançadas, 
+        //como candidatura a vagas ou publicação de vagas.
+        if (!$empresa || $empresa->getTipoUsuarioId() != 3) {
+            $this->jsonResponse([
+                "success" => false,
+                "errors" => ["Somente usuários Empresa podem publicar vagas."]
+            ]);
+            return;
+        }
+
         $vaga = new Vaga();
         $vaga->setTitulo($titulo);
         $vaga->setModalidade($modalidade);
@@ -310,7 +322,8 @@ class VagaApiController extends ApiController
         $vaga->setEmpresa($empresa);
 
 
-
+        // RN 10 - O campo “salário” não pode receber valores negativos 
+        //validarDados() verifica se salário é negativo, se for, retorna erro
         $erros = $this->vagaService->validarDados($vaga);
         if (empty($erros)) {
 
@@ -366,6 +379,8 @@ class VagaApiController extends ApiController
             "dados" => $dados
         ], 400);
     }
+
+    //RN 08 - Remoções de usuários ou vagas são tratados como deleção lógica .
     protected function alterarStatus()
     {
         $id = $_GET["id"] ?? null;

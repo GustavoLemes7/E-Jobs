@@ -30,6 +30,8 @@ class LoginApiController extends ApiController
         if (empty($erros)) {
             $usuario = $this->usuarioDao->findByLoginSenha($email, $senha);
             if ($usuario) {
+                // RN09 - Usuários inativos não podem acessar o sistema
+                //Permite login apenas se o status do usuário for Ativo; caso contrário, retorna erro.
                 if ($usuario->getStatus() === Status::ATIVO) {
                     session_start();
                     $_SESSION['usuario_id'] = $usuario->getId();

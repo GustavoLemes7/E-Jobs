@@ -22,6 +22,10 @@ class VagaService{
         
             if (! $vaga->getSalario())
                 array_push($erros, "O campo [Salário] é obrigatório.");
+
+            // RN 10 - O campo “salário” não pode receber valores negativos
+            if ($vaga->getSalario() < 0) 
+                array_push($erros, "O salário não pode ser negativo.");         
         
             if (! $vaga->getDescricao())
                 array_push($erros, "O campo [Descrição] é obrigatório.");
@@ -41,5 +45,7 @@ class VagaService{
         
             return $erros;
         }
+
+        
         
 }

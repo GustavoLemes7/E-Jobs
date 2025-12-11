@@ -60,6 +60,8 @@ class UsuarioService {
         return $erros;
     }
 
+    // RN 02 - Um CPF não pode estar ligado a mais de um usuário.
+    // RN 03 - Um CNPJ não pode estar ligado a mais de um usuário.
     public function validarDocumento(string $documento){
         $erros = array();
         $usuario = $this->usuarioDAO->findByDocumento($documento);
@@ -69,6 +71,7 @@ class UsuarioService {
         return $erros;
     }
 
+    // RN 01 - Cada usuário deve possuir um e-mail único para cadastro.
     public function validarEmail(string $email) {
         $erros = array();
         $usuario = $this->usuarioDAO->findByEmail($email);

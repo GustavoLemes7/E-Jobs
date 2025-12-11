@@ -87,6 +87,14 @@ class CategoriaDAO {
         $stm->execute();
     }
     
+    public function categoriaTemVaga($id) {
+        $conn = Connection::getConn();
+        $sql = "SELECT COUNT(*) AS total FROM vaga WHERE categoria_id = ?";
+        $stmt = $conn->prepare($sql);
+        $stmt->execute([$id]);
+
+        return $stmt->fetchColumn() > 0; 
+    }
 
     private function mapCategoria($result) {
         $categorias = array();

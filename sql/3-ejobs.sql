@@ -7,9 +7,9 @@ CREATE TABLE tipo_usuario (
 CREATE TABLE usuario (
     id INT PRIMARY KEY AUTO_INCREMENT,
     nome VARCHAR(255),
-    email VARCHAR(255),
+    email VARCHAR(255) UNIQUE,
     senha VARCHAR(255),
-    documento VARCHAR(255),
+    documento VARCHAR(255) UNIQUE,
     descricao TEXT,
     cidade_id INT,
     end_logradouro VARCHAR(100),

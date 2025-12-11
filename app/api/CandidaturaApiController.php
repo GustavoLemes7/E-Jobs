@@ -3,6 +3,7 @@ require_once(__DIR__ . "/ApiController.php");
 require_once(__DIR__ . "/../service/NotificacaoService.php");
 require_once(__DIR__ . "/../observer/NotificacaoObserver.php");
 require_once(__DIR__ . "/../dao/CandidaturaDAO.php");
+require_once(__DIR__ . "/../dao/UsuarioDAO.php");
 require_once(__DIR__ . "/../dao/VagaDAO.php");
 require_once(__DIR__ . "/../dao/NotificacaoDAO.php");
 require_once(__DIR__ . "/../model/Candidatura.php");
@@ -12,6 +13,7 @@ require_once(__DIR__ . "/../model/Vaga.php");
 class CandidaturaApiController extends ApiController
 {
     private CandidaturaDAO $dao;
+    private UsuarioDAO $usuarioDao;
     private VagaDAO $vagaDao;
     private NotificacaoObserver $observer;
 
@@ -39,6 +41,20 @@ class CandidaturaApiController extends ApiController
             return;
         }
 
+        // RN 04 - Apenas usuários Candidatos e usuários Empresa podem acessar funcionalidades avançadas, 
+        //como candidatura a vagas ou publicação de vagas.
+        $usuario = $this->usuarioDao->findById($idUsuario);
+
+        if (!$usuario || $usuario->getTipoUsuarioId() != 1) {
+            $this->jsonResponse([
+                "success" => false,
+                "errors" => ["Tipo de usuário não autorizado para esta operação."]
+            ]);
+            return;
+        }
+
+
+        // RN 05 - Um Usuário não pode se candidatar duas vezes para uma mesma vaga.
         $jaExiste = $this->dao->findByCandidatoAndVaga($idUsuario, $idVaga);
         if ($jaExiste) {
             $this->jsonResponse([
