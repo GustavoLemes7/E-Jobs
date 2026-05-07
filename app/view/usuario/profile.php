@@ -1,198 +1,366 @@
 <?php
 require_once(__DIR__ . "/../include/header.php");
 require_once(__DIR__ . "/../include/menu.php");
+require_once(__DIR__ . "/../../util/View.php");
 ?>
 
-<style>
-.profile-card {
-    border: none;
-    border-radius: 15px;
-    box-shadow: 0 0 20px rgba(0,0,0,0.1);
-}
-
-.profile-header {
-    background: linear-gradient(135deg, #0d6efd 0%, #0a58ca 100%);
-    border-radius: 15px 15px 0 0;
-    padding: 2rem;
-}
-
-.profile-icon {
-    width: 80px;
-    height: 80px;
-    background: rgba(255,255,255,0.2);
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin-bottom: 1rem;
-}
-
-.profile-icon i {
-    font-size: 2.5rem;
-    color: white;
-}
-
-.info-card {
-    background: #f8f9fa;
-    border-radius: 10px;
-    padding: 1.5rem;
-    margin-bottom: 1rem;
-    transition: all 0.3s ease;
-}
-
-.info-card:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-}
-
-.info-icon {
-    width: 40px;
-    height: 40px;
-    background: #e9ecef;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin-right: 1rem;
-}
-
-.info-icon i {
-    font-size: 1.2rem;
-    color: #0d6efd;
-}
-
-.edit-btn {
-    position: absolute;
-    top: 1rem;
-    right: 1rem;
-    background: rgba(255,255,255,0.2);
-    border: none;
-    border-radius: 50%;
-    width: 40px;
-    height: 40px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: all 0.3s ease;
-}
-
-.edit-btn:hover {
-    background: rgba(255,255,255,0.3);
-    transform: scale(1.1);
-}
-
-.edit-btn i {
-    color: white;
-    font-size: 1.2rem;
-}
-</style>
+<?php $usuario = $dados['usuario'] ?? null; ?>
+<?php $experiencias = $dados['experiencias'] ?? null; ?>
+<?php $formacoes = $dados['formacoes'] ?? null; ?>
+<?php $isOwnProfile = $dados['isOwnProfile'] ?? null; ?>
+<?php $isEmpresa = $dados['isEmpresa'] ?? null; ?>
 
 <div class="container mt-4">
     <div class="row justify-content-center">
-        <div class="col-md-8">
-            <div class="card profile-card">
-                <div class="profile-header text-white position-relative">
-                    <div class="text-center">
-                        <div class="profile-icon mx-auto">
-                            <i class="fas fa-user"></i>
+        <div class="col-lg-8">
+
+            <!-- HEADER -->
+            <div class="card shadow mb-3">
+                <div class="card-body d-flex align-items-center">
+
+                    <img 
+                        src="<?= $isEmpresa 
+                            ? ($usuario?->getLogoUrl() 
+                                ? PUBLICURL . $usuario->getLogoUrl() 
+                                : 'https://placehold.co/80x80')
+                            : ($usuario?->getFotoPerfilUrl() 
+                                ? PUBLICURL . $usuario->getFotoPerfilUrl() 
+                                : 'https://placehold.co/80x80')
+                        ?>"
+                        class="rounded-circle"
+                        width="80" height="80"
+                        style="cursor:pointer"
+                        data-toggle="modal"
+                        data-target="#fotoModal"
+                    >
+
+                    <div class="flex-grow-1 ml-3">
+                        <h4 class="mb-1">
+                            <?= htmlspecialchars($isEmpresa 
+                                ? $usuario?->getNomeFantasia() 
+                                : $usuario?->getNomeCompleto()) ?>
+                        </h4>
+
+                        <?php if ($isEmpresa): ?>
+                            <small class="text-muted">
+                                <?= htmlspecialchars($usuario?->getRazaoSocial()) ?>
+                            </small>
+                        <?php endif; ?>
+
+                        <div class="mt-2">
+                            <button class="btn btn-outline-primary btn-sm"
+                                    data-toggle="modal"
+                                    data-target="#contatoModal">
+                                <i class="fas fa-envelope"></i> Contato
+                            </button>
                         </div>
-                        <h3 class="mb-0"><?= htmlspecialchars($dados["usuario"]->getNome()) ?></h3>
-                        <p class="mb-0 opacity-75"><?= htmlspecialchars($dados["usuario"]->getEmail()) ?></p>
                     </div>
-                    <?php if ($dados["isOwnProfile"]): ?>
-                    <a href="<?= BASEURL ?>/controller/UsuarioController.php?action=editProfile" class="edit-btn">
-                        <i class="fas fa-pencil-alt"></i>
-                    </a>
+
+                </div>
+            </div>
+
+
+            <!-- SOBRE -->
+            <div class="card shadow mb-3">
+                <div class="card-header d-flex justify-content-between">
+                    <strong>Sobre</strong>
+
+                    <?php if ($isOwnProfile): ?>
+                        <button class="btn btn-outline-primary btn-sm"
+                                data-toggle="modal"
+                                data-target="#sobreModal">
+                            <i class="fas fa-edit"></i>
+                        </button>
                     <?php endif; ?>
                 </div>
-                <div class="card-body p-4">
-                    <div class="row">
-                        <div class="col-md-6">
-                            <div class="info-card d-flex align-items-center">
-                                <div class="info-icon">
-                                    <i class="fas fa-id-card"></i>
-                                </div>
-                                <div>
-                                    <small class="text-muted d-block">Documento</small>
-                                    <strong><?= htmlspecialchars($dados["usuario"]->getDocumento()) ?></strong>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="info-card d-flex align-items-center">
-                                <div class="info-icon">
-                                    <i class="fas fa-phone"></i>
-                                </div>
-                                <div>
-                                    <small class="text-muted d-block">Telefone</small>
-                                    <strong><?= htmlspecialchars($dados["usuario"]->getTelefone()) ?></strong>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
 
-                    <div class="row">
-                        <div class="col-md-6">
-                            <div class="info-card d-flex align-items-center">
-                                <div class="info-icon">
-                                    <i class="fas fa-map-marker-alt"></i>
-                                </div>
-                                <div>
-                                    <small class="text-muted d-block">Estado</small>
-                                    <strong><?= htmlspecialchars($dados["usuario"]->getCidade()->getEstado()->getNome()) ?></strong>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="info-card d-flex align-items-center">
-                                <div class="info-icon">
-                                    <i class="fas fa-city"></i>
-                                </div>
-                                <div>
-                                    <small class="text-muted d-block">Cidade</small>
-                                    <strong><?= htmlspecialchars($dados["usuario"]->getCidade()->getNome()) ?></strong>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+                <div class="card-body">
+                    <p>
+                        <?= htmlspecialchars(
+                            $isEmpresa 
+                                ? ($usuario?->getDescricao() ?? 'Descrição não informada')
+                                : ($usuario?->getDescricao() ?? 'Adicione uma descrição...')
+                        ) ?>
+                    </p>
+                </div>
+            </div>
+            
+            <?php if (!empty($dados['msgErro'])): ?>
+                <div class="alert alert-danger">
+                    <?= $dados['msgErro'] ?>
+                </div>
+            <?php endif; ?>
 
-                    <div class="row">
-                        <div class="col-12">
-                            <div class="info-card d-flex align-items-start">
-                                <div class="info-icon">
-                                    <i class="fas fa-map"></i>
-                                </div>
-                                <div>
-                                    <small class="text-muted d-block">Endereço</small>
-                                    <strong>
-                                        <?= htmlspecialchars($dados["usuario"]->getEndLogradouro()) ?>, 
-                                        <?= htmlspecialchars($dados["usuario"]->getEndBairro()) ?>, 
-                                        Nº <?= htmlspecialchars($dados["usuario"]->getEndNumero()) ?>
-                                    </strong>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+            <?php if ($isEmpresa): ?>
+            <div class="card shadow mb-3">
+                <div class="card-header d-flex justify-content-between">
+                    <strong>Dados da Empresa</strong>
 
-                    <?php if ($dados["usuario"]->getDescricao()): ?>
-                    <div class="row">
-                        <div class="col-12">
-                            <div class="info-card d-flex align-items-start">
-                                <div class="info-icon">
-                                    <i class="fas fa-file-alt"></i>
-                                </div>
-                                <div>
-                                    <small class="text-muted d-block">Descrição</small>
-                                    <strong><?= nl2br(htmlspecialchars($dados["usuario"]->getDescricao())) ?></strong>
-                                </div>
+                    <?php if ($isOwnProfile): ?>
+                        <button class="btn btn-outline-primary btn-sm"
+                                data-toggle="modal"
+                                data-target="#dadosEmpresa">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                    <?php endif; ?>
+                </div>
+
+                <div class="card-body">
+                    <ul class="list-unstyled">
+                        <li><strong>CNPJ:</strong> <?= $usuario?->getCnpj() ?></li>
+                        <li><strong>Inscrição Estadual:</strong> <?= $usuario?->getInscricaoEstadual() ?></li>
+                        <li><strong>Data de Abertura:</strong> <?= $usuario?->getDataAbertura() ?></li>
+                        <li><strong>Funcionários:</strong> <?= $usuario?->getNumeroFuncionarios() ?></li>
+                    </ul>
+                </div>
+            </div>
+
+
+            <?php endif; ?>
+            
+            <?php if (!$isEmpresa): ?>
+            <!-- EXPERIÊNCIA -->
+            <div class="card shadow mb-3">
+                <div class="card-header d-flex justify-content-between">
+                    <strong>Experiência</strong>
+
+                    <?php if ($isOwnProfile): ?>
+                        <button class="btn btn-sm btn-success"
+                                data-toggle="modal"
+                                data-target="#experienciaModal">
+                            <i class="fas fa-plus"></i> Adicionar
+                        </button>
+                    <?php endif; ?>
+                </div>
+
+                <div class="card-body">
+
+                    <?php if (!empty($experiencias)): ?>
+
+                        <?php foreach ($experiencias as $exp): ?>
+                            <div class="mb-3 border-bottom pb-3">
+
+                                <strong><?= htmlspecialchars($exp->getCargo()) ?></strong><br>
+
+                                <span class="text-muted">
+                                    <?= htmlspecialchars($exp->getEmpresa()) ?>
+                                </span><br>
+
+                                <small class="text-muted">
+                                    <?= htmlspecialchars($exp->getDataInicio()) ?> -
+                                    <?= htmlspecialchars($exp->getDataFim()) ?>
+                                </small>
+
+                                <?php if ($exp->getDescricao()): ?>
+                                    <p class="mt-2">
+                                        <?= htmlspecialchars($exp->getDescricao()) ?>
+                                    </p>
+                                <?php endif; ?>
+
+                                <?php if ($isOwnProfile): ?>
+                                    <div class="mt-2">
+
+                                        <!-- EDITAR -->
+                                        <button class="btn btn-sm btn-outline-primary"
+                    data-toggle="modal"
+                    data-target="#editarExperienciaModal"
+                    onclick='editarExperiencia(
+                        <?= (int)$exp->getId() ?>,
+                        <?= json_encode($exp->getCargo()) ?>,
+                        <?= json_encode($exp->getEmpresa()) ?>,
+                        <?= json_encode($exp->getDataInicio()) ?>,
+                        <?= json_encode($exp->getDataFim()) ?>,
+                        <?= json_encode($exp->getDescricao()) ?>
+                    )'>
+                <i class="fas fa-edit"></i> Editar
+            </button>
+
+                                        <!-- EXCLUIR -->
+                                        <a href="<?= BASEURL ?>/controller/CandidatoController.php?action=deleteExperiencia&id=<?= $exp->getId() ?>"
+                                        class="btn btn-sm btn-outline-danger"
+                                        onclick="return confirm('Deseja excluir esta experiência?')">
+                                            <i class="fas fa-trash"></i> Excluir
+                                        </a>
+
+                                    </div>
+                                <?php endif; ?>
+
                             </div>
-                        </div>
-                    </div>
+                        <?php endforeach; ?>
+
+                    <?php else: ?>
+                        <p class="text-muted">Nenhuma experiência cadastrada</p>
+                    <?php endif; ?>
+
+                </div>
+            </div>
+
+            <!-- FORMAÇÃO -->
+            <div class="card shadow mb-3">
+                <div class="card-header d-flex justify-content-between">
+                    <strong>Formação</strong>
+                     <?php if ($dados['isOwnProfile']): ?>
+                    <button class="btn btn-sm btn-success"
+                        data-toggle="modal"
+                        data-dismiss="modal"
+                        data-target="#formacaoModal">
+                        <i class="fas fa-plus"></i> Adicionar
+                    </button>
+                    <?php endif; ?>
+                </div>
+                <div class="card-body">
+                    <?php if (!empty($formacoes)): ?>
+
+                        <?php foreach ($formacoes as $form): ?>
+                            <div class="mb-3 border-bottom pb-2">
+
+                                <strong><?= htmlspecialchars($form->getCurso()) ?></strong><br>
+
+                                <span class="text-muted">
+                                    <?= htmlspecialchars($form->getInstituicao()) ?>
+                                </span><br>
+
+                                <small class="text-muted">
+                                    <?= htmlspecialchars($form->getDataInicio()) ?> - 
+                                    <?= htmlspecialchars($form->getDataFim()) ?>
+                                </small>
+
+                                <?php if ($form->getDescricao()): ?>
+                                    <p class="mt-1"><?= htmlspecialchars($form->getDescricao()) ?></p>
+                                <?php endif; ?>
+
+                                     <?php if ($isOwnProfile): ?>
+                                    <div class="mt-2">
+
+                                        <!-- EDITAR -->
+                                        <button class="btn btn-sm btn-outline-primary"
+                    data-toggle="modal"
+                    data-target="#editarFormacaoModal"
+                    onclick='editarFormacao(
+                        <?= (int)$form->getId() ?>,
+                        <?= json_encode($form->getCurso()) ?>,
+                        <?= json_encode($form->getInstituicao()) ?>,
+                        <?= json_encode($form->getDataInicio()) ?>,
+                        <?= json_encode($form->getDataFim()) ?>,
+                        <?= json_encode($form->getDescricao()) ?>
+                    )'>
+                <i class="fas fa-edit"></i> Editar
+            </button>
+
+                                        <!-- EXCLUIR -->
+                                        <a href="<?= BASEURL ?>/controller/CandidatoController.php?action=deleteFormacao&id=<?= $form->getId() ?>"
+                                        class="btn btn-sm btn-outline-danger"
+                                        onclick="return confirm('Deseja excluir esta formação?')">
+                                            <i class="fas fa-trash"></i> Excluir
+                                        </a>
+
+                                    </div>
+                                <?php endif; ?>
+
+                            </div>
+                        <?php endforeach; ?>
+
+                    <?php else: ?>
+                        <p class="text-muted">Nenhuma formação cadastrada</p>
                     <?php endif; ?>
                 </div>
             </div>
+
+                <!-- CURRÍCULO -->
+            <div class="card shadow mb-3">
+                <div class="card-header d-flex justify-content-between">
+                    <strong>Currículo</strong>
+
+                    <?php if ($dados['isOwnProfile']): ?>
+                        <button class="btn btn-sm btn-success"
+                                data-toggle="modal"
+                                data-target="#curriculoModal">
+                            <i class="fas fa-upload"></i> Atualizar
+                        </button>
+                    <?php endif; ?>
+                </div>
+
+                <div class="card-body">
+
+                    <?php if ($usuario?->getCurriculoUrl()): ?>
+
+                        <p>
+                            <i class="fas fa-file-pdf text-danger"></i>
+                            <a href="<?= PUBLICURL . $usuario->getCurriculoUrl() ?>" target="_blank">
+                                Visualizar currículo
+                            </a>
+                        </p>
+
+                    <?php else: ?>
+
+                        <p class="text-muted">Nenhum currículo enviado</p>
+
+                        <?php if ($dados['isOwnProfile']): ?>
+                            <button class="btn btn-primary btn-sm"
+                                    data-toggle="modal"
+                                    data-target="#curriculoModal">
+                                <i class="fas fa-upload"></i> Enviar currículo
+                            </button>
+                        <?php endif; ?>
+
+                    <?php endif; ?>
+
+                </div>
+            </div>
+            <?php endif; ?>
+
         </div>
     </div>
 </div>
 
-<?php require_once(__DIR__ . "/../include/footer.php"); ?> 
+<?php
+    render(__DIR__ . "/modals/foto.php", [
+        "usuario" => $usuario,
+        "isEmpresa" => $isEmpresa
+    ]);
+
+    render(__DIR__ . "/modals/contato.php", [
+        "usuario" => $usuario,
+        "isEmpresa" => $isEmpresa,
+        "isOwnProfile" => $isOwnProfile
+    ]);
+
+    render(__DIR__ . "/modals/sobre.php", [
+        "usuario" => $usuario,
+        "isEmpresa" => $isEmpresa
+    ]);
+
+    if($isEmpresa){
+        render(__DIR__ . "/modals/dados_empresa.php", [
+        "usuario" => $usuario,
+        "isEmpresa" => $isEmpresa
+    ]);
+    }
+
+
+?>
+<?php if (!$isEmpresa): ?>
+
+    <?php
+    render(__DIR__ . "/modals/experiencia.php", [
+        "candidato" => $usuario
+    ]);
+
+    render(__DIR__ . "/modals/formacao.php", [
+        "candidato" => $usuario
+    ]);
+
+
+    render(__DIR__. "/modals/curriculo.php",[
+        "candidato" => $usuario
+    ]);
+    ?>
+
+<?php endif; ?>
+
+
+<script src="<?= BASEURL ?>/view/usuario/js/previewFoto.js"></script>
+<script src="<?= BASEURL ?>/view/usuario/js/editarExperiencia.js"></script>
+<script src="<?= BASEURL ?>/view/usuario/js/editarFormacao.js"></script>
+<?php require_once(__DIR__ . "/../include/footer.php"); ?>
+

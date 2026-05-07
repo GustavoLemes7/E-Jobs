@@ -3,7 +3,7 @@
 include_once(__DIR__ . "/../dao/CategoriaDAO.php");
 include_once(__DIR__ . "/../service/CategoriaService.php");
 require_once(__DIR__ . "/Controller.php");
-require_once(__DIR__ . "/../model/TipoUsuario.php");
+require_once(__DIR__ . "/../model/enum/TipoUsuario.php");
 
 class CategoriaController extends Controller { 
     private CategoriaDAO $categoriaDao;
@@ -14,7 +14,7 @@ class CategoriaController extends Controller {
             exit;
 
         $papel = $_SESSION[SESSAO_USUARIO_PAPEL];
-        if ($papel == TipoUsuario::ID_CANDIDATO) {
+        if ($papel == TipoUsuario::CANDIDATO) {
             header("location: " . HOME_PAGE);
             exit;
         }

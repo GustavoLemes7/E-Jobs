@@ -23,7 +23,7 @@ class CategoriaDAO {
 
         $sql = "SELECT c.id, c.nome, c.icone, COUNT(v.id) AS total_vagas
                 FROM categorias c  
-                LEFT JOIN vaga v ON v.categoria_id = c.id AND v.status = 'Ativo'
+                LEFT JOIN vagas v ON v.categoria_id = c.id AND v.status = 'Ativo'
                 GROUP BY c.id, c.nome, c.icone
                 ORDER BY c.nome ASC Limit 4" ;
         $stm = $conn->prepare($sql);    
@@ -89,7 +89,7 @@ class CategoriaDAO {
     
     public function categoriaTemVaga($id) {
         $conn = Connection::getConn();
-        $sql = "SELECT COUNT(*) AS total FROM vaga WHERE categoria_id = ?";
+        $sql = "SELECT COUNT(*) AS total FROM vagas WHERE categoria_id = ?";
         $stmt = $conn->prepare($sql);
         $stmt->execute([$id]);
 

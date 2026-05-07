@@ -10,7 +10,7 @@ class Vaga {
     private ?string $descricao;
     private ?string $requisitos;
     private ?string $status;
-    private ?Usuario $empresa;
+    private ?Empresa $empresa;
     private ?Cargo $cargo;
     private ?Categoria $categoria;   
     
@@ -90,11 +90,11 @@ class Vaga {
         return $this;
     }
 
-    public function getEmpresa(): ?Usuario {
+    public function getEmpresa(): ?Empresa {
         return $this->empresa;
     }
 
-    public function setEmpresa(?Usuario $empresa): void {
+    public function setEmpresa(?Empresa $empresa): void {
         $this->empresa = $empresa;
     }
 

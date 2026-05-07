@@ -2,13 +2,20 @@
 
 class TipoUsuario {
 
-    public const ID_CANDIDATO = 1;
-    public const ID_ADMINISTRADOR = 2;
-    public const ID_EMPRESA = 3;
+    public const CANDIDATO = "CANDIDATO";
+    public const ADMINISTRADOR = "ADMINISTRADOR";
+    public const EMPRESA = "EMPRESA";
 
     private ?int $id;
     private ?string $nome;
 
+    public static function getAllAsArray() {
+        return [TipoUsuario::CANDIDATO, TipoUsuario::EMPRESA, TipoUsuario::ADMINISTRADOR];
+    }
+
+     public static function getEmpresaCandidatoAsArray() {
+        return [TipoUsuario::CANDIDATO, TipoUsuario::EMPRESA];
+    }
     
     /**
      * Get the value of id

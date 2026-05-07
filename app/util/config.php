@@ -1,45 +1,41 @@
 <?php
-#Nome do arquivo: config.php
-#Objetivo: define constantes para serem utilizadas no projeto
+require_once __DIR__ . '/../../vendor/autoload.php';
 
-//Configuraçao de erro no PHP
+# Carrega .env PRIMEIRO
+$dotenv = Dotenv\Dotenv::createImmutable(__DIR__ . '/../../');
+$dotenv->load();
+
+//Configuração de erro no PHP
 ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
 
-//Banco de dados: conexão MySQL
-define('DB_HOST', 'localhost');
-define('DB_NAME', 'ejobs');
-define('DB_USER', 'root');
-define('DB_PASSWORD', 'root');
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
 
-//Caminho para adionar imagens, scripts e chamar páginas no sistema
-//Deve ter o nome da pasta do projeto no servidor APACHE
+//Banco de dados (AGORA usando .env)
+define('DB_HOST', $_ENV['DB_HOST']);
+define('DB_NAME', $_ENV['DB_NAME']);
+define('DB_USER', $_ENV['DB_USER']);
+define('DB_PASSWORD', $_ENV['DB_PASSWORD']);
+
+//Base URL
 define('BASEURL', '/E-Jobs/app');
 
+define("PUBLICURL", "http://localhost/E-Jobs/public");
+
 //Nome do sistema
-define('APP_NAME', 'E-Jobs');
+define('APP_NAME', $_ENV['APP_NAME']);
 
-//Página de logout do sistema
+//Rotas
 define('LOGIN_PAGE', BASEURL . '/controller/LoginController.php?action=login');
-
-//Página de login do sistema
 define('LOGOUT_PAGE', BASEURL . '/controller/LoginController.php?action=logout');
-
-//Página home do sistema
 define('HOME_PAGE', BASEURL . '/controller/HomeController.php?action=home');
-
-//Página home da Empresa
 define('EMPRESAHOME_PAGE', BASEURL . '/controller/EmpresaController.php?action=home');
-
-//Página home do Administrador do sistema
 define('ADMINHOME_PAGE', BASEURL . '/controller/AdminController.php?action=home');
 
-//Sessão do usuário
+//Sessão
 define('SESSAO_USUARIO_ID', "usuarioLogadoId");
 define('SESSAO_USUARIO_NOME', "usuarioLogadoNome");
 define('SESSAO_USUARIO_PAPEL', "usuarioLogadoPapel");
-
-
-
-

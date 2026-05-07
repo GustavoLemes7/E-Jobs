@@ -4,7 +4,7 @@ require_once(__DIR__ . "/Vaga.php");
 
 class Candidatura {
     private ?int $id;
-    private ?Usuario $candidato;
+    private ?Candidato $candidato;
     private ?Vaga $vaga;
     private $dataCandidatura;
     private ?string $status;
@@ -26,11 +26,11 @@ class Candidatura {
         return $this;
     }
 
-    public function getCandidato(): ?Usuario {
+    public function getCandidato(): ?Candidato {
         return $this->candidato;
     }
 
-    public function setCandidato(?Usuario $candidato): self {
+    public function setCandidato(?Candidato $candidato): self {
         $this->candidato = $candidato;
         return $this;
     }

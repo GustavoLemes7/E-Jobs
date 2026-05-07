@@ -23,9 +23,11 @@ require_once(__DIR__ . "/../include/menu.php");
                                     <i class="fas fa-check me-1"></i>Candidatura já realizada
                                 </button>
                             <?php else: ?>
+                                <?php if ($_SESSION[SESSAO_USUARIO_ID] != $dados['vaga']->getEmpresa()->getUsuario_id()): ?>
                                 <a href="CandidaturaController.php?action=candidatar&id=<?= $dados['vaga']->getId() ?>" class="btn btn-success">
                                     <i class="fas fa-paper-plane me-1"></i>Candidatar-se
                                 </a>
+                                <?php endif; ?>
                             <?php endif; ?>
                         <?php else: ?>
                             <a href="<?= BASEURL ?>/controller/LoginController.php?action=login" class="btn btn-success">
@@ -40,7 +42,7 @@ require_once(__DIR__ . "/../include/menu.php");
                         <div class="d-flex align-items-center mb-3">
                             <i class="fas fa-building detalhes-icon"></i>
                             <span class="detalhes-label">Empresa:</span>
-                            <span class="detalhes-info"><?= htmlspecialchars($dados['vaga']->getEmpresa()->getNome()); ?></span>
+                            <span class="detalhes-info"><?= htmlspecialchars($dados['vaga']->getEmpresa()->getNomeFantasia()); ?></span>
                         </div>
 
                         <div class="d-flex align-items-center mb-3">

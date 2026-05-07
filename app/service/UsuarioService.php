@@ -1,6 +1,7 @@
 <?php
     
 require_once(__DIR__ . "/../model/Usuario.php");
+require_once(__DIR__ . "/../model/UsuarioAuth.php");
 require_once(__DIR__ . "/../dao/UsuarioDAO.php");
 
 class UsuarioService {
@@ -9,65 +10,32 @@ class UsuarioService {
 
     public function __construct() {
         $this->usuarioDAO = new UsuarioDAO();
+  
     }
 
     /* Método para validar os dados do usuário que vem do formulário */
-    public function validarDados(Usuario $usuario, ?string $confSenha) {
+    public function validarDados(UsuarioAuth $usuarioAuth, ?string $confSenha) {
         $erros = array();
     
         // Validar campos obrigatórios
-        if (! $usuario->getTipoUsuario()) 
-            array_push($erros, "O campo [Papel] é obrigatório.");
-        
-        if (! $usuario->getNome())
-            array_push($erros, "O campo [Nome] é obrigatório.");
     
-        if (! $usuario->getEmail())
+        if (! $usuarioAuth->getUsuario()->getEmail())
             array_push($erros, "O campo [Email] é obrigatório.");
     
-        if (! $usuario->getSenha())
+        if (! $usuarioAuth->getSenha())
             array_push($erros, "O campo [Senha] é obrigatório.");
     
         if (! $confSenha)
             array_push($erros, "O campo [Confirmação da senha] é obrigatório.");
     
-        
-        if (! $usuario->getDocumento())
-            array_push($erros, "O campo [Documento] é obrigatório.");
     
-        if (! $usuario->getDescricao())
-            array_push($erros, "O campo [Descrição] é obrigatório.");
-
-        if (! $usuario->getCidade()->getCodigoIbge())
-            array_push($erros, "O campo [Cidade] é obrigatório.");
-    
-        if (! $usuario->getEndLogradouro())
-            array_push($erros, "O campo [Logradouro] é obrigatório.");
-    
-        if (! $usuario->getEndBairro())
-            array_push($erros, "O campo [Bairro] é obrigatório.");
-    
-        if (! $usuario->getEndNumero())
-            array_push($erros, "O campo [Número] é obrigatório.");
-    
-        if (! $usuario->getTelefone())
+        if (! $usuarioAuth->getUsuario()->getTelefone())
             array_push($erros, "O campo [Telefone] é obrigatório.");
     
         // Validar se a senha é igual à confirmação
-        if ($usuario->getSenha() && $confSenha && $usuario->getSenha() != $confSenha)
+        if ($usuarioAuth->getSenha() && $confSenha && $usuarioAuth->getSenha() != $confSenha)
             array_push($erros, "O campo [Senha] deve ser igual ao [Confirmação da senha].");
     
-        return $erros;
-    }
-
-    // RN 02 - Um CPF não pode estar ligado a mais de um usuário.
-    // RN 03 - Um CNPJ não pode estar ligado a mais de um usuário.
-    public function validarDocumento(string $documento){
-        $erros = array();
-        $usuario = $this->usuarioDAO->findByDocumento($documento);
-        if($usuario != null)
-            array_push($erros, "Já existe um usuário utilizando esse documento");
-          
         return $erros;
     }
 
@@ -79,6 +47,31 @@ class UsuarioService {
             array_push($erros, "Já existe um usuário utilizando esse email");
           
         return $erros; 
+    }
+
+    public function validarSenha(string $senha){
+        $erros = array();
+        if(strlen($senha) < 8){
+            array_push($erros, "Tamanho mínimo 8 caracteres");
+        }
+        if(ctype_alnum($senha)){
+            array_push($erros, "1 caractere especial" );
+        }
+
+        if(!preg_match('/[a-z]/', $senha)){
+            array_push($erros, "1 caractere mínusculo");
+        }
+
+        if(!preg_match('/[A-Z]/', $senha)){
+            array_push($erros, "1 caractere maiúsculo");
+        }
+
+        if(!preg_match('/[0-9]/', $senha)){
+            array_push($erros, "1 número");
+        }
+
+        return $erros;
+
     }
 
     public function validarCPF(string $cpf): bool {

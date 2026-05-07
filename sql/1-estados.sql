@@ -1,4 +1,3 @@
-use ejobs;
 CREATE TABLE estados(
     codigo_uf INT NOT NULL,
     uf VARCHAR(2) NOT NULL,

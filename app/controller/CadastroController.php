@@ -2,17 +2,19 @@
 #Classe controller para Usuário
 require_once(__DIR__ . "/Controller.php");
 require_once(__DIR__ . "/../dao/UsuarioDAO.php");
-require_once(__DIR__ . "/../dao/TipoUsuarioDAO.php");
+require_once(__DIR__ . "/../dao/UsuarioAuthDAO.php");
 require_once(__DIR__ . "/../dao/EstadoDAO.php");
 require_once(__DIR__ . "/../service/UsuarioService.php");
 require_once(__DIR__ . "/../service/LoginService.php");
 require_once(__DIR__ . "/../model/Usuario.php");
+require_once(__DIR__ . "/../model/UsuarioAuth.php");
 require_once(__DIR__ . "/../model/enum/Status.php");
+require_once(__DIR__ . "/../model/enum/TipoUsuario.php");
 
 class CadastroController extends Controller {
 
     private UsuarioDAO $usuarioDao;
-    private TipoUsuarioDAO $tipoUsuarioDAO;
+    private UsuarioAuthDAO $usuarioAuthDao;
     private EstadoDAO $estadoDAO;
     private UsuarioService $usuarioService;
     private LoginService $loginService;
@@ -21,7 +23,7 @@ class CadastroController extends Controller {
     public function __construct() {
     
         $this->usuarioDao = new UsuarioDAO();
-        $this->tipoUsuarioDAO = new TipoUsuarioDAO();
+        $this->usuarioAuthDao = new UsuarioAuthDAO();
         $this->estadoDAO = new EstadoDAO();
         $this->usuarioService = new UsuarioService();
         $this->loginService = new LoginService();
@@ -30,80 +32,42 @@ class CadastroController extends Controller {
         $this->handleAction();
     }
 
-    protected function create() {
-        $dados["estados"] = $this->estadoDAO->list();
-        $dados["papeis"] = $this->tipoUsuarioDAO->listSemADM();
-        
-        $this->loadView("usuario/form_cadastro.php", $dados);
+    protected function createFormUsuario() {
+       
+        $this->loadView("usuario/form_usuario.php",[]);
         
     }
 
-    protected function save() {
+    protected function saveUsuario() {
         //Captura os dados do formulário
-        $idTipoUsuario = isset($_POST['tipoUsuario']) && is_numeric($_POST['tipoUsuario']) ? (int)$_POST['tipoUsuario'] : NULL;
-        $nome = trim($_POST['nome']) ? trim($_POST['nome']) : NULL;
         $email = trim($_POST['email']) ? trim($_POST['email']) : NULL;
         $senha = trim($_POST['senha']) ? trim($_POST['senha']) : NULL;
         $confSenha = trim($_POST['conf_senha']) ? trim($_POST['conf_senha']) : NULL;
-        
-        $documento = NULL;
-        if(isset($_POST['documento']))
-            $documento = trim($_POST['documento']) ? trim($_POST['documento']) : NULL;
-        
-        $descricao = trim($_POST['descricao']) ? trim($_POST['descricao']) : NULL;
-        $estadoId = isset($_POST['estado']) && is_numeric($_POST['estado']) ? $_POST['estado'] : NULL;
-        $cidadeId = trim($_POST['cidade']) ? trim($_POST['cidade']) : NULL;
-        $endLogradouro = trim($_POST['endLogradouro']) ? trim($_POST['endLogradouro']) : NULL;
-        $endBairro = trim($_POST['endBairro']) ? trim($_POST['endBairro']) : NULL;
-        $endNumero = trim($_POST['endNumero']) ? trim($_POST['endNumero']) : NULL;
         $telefone = trim($_POST['telefone']) ? trim($_POST['telefone']) : NULL;
         
         //Cria objeto Usuario
         $usuario = new Usuario();
+        $usuarioAuth = new UsuarioAuth();
 
-        if($idTipoUsuario) {
-            $tipoUsuario = new TipoUsuario();
-            $tipoUsuario->setId($idTipoUsuario);
-            $usuario->setTipoUsuario($tipoUsuario);
-        } else
-            $usuario->setTipoUsuario(null);
-
-        $usuario->setNome($nome);
+  
+        $usuario->setTipoUsuario(null);
         $usuario->setEmail($email);
-        $usuario->setSenha($senha);
-        $usuario->setDocumento($documento);
-        $usuario->setDescricao($descricao);
-        
-        $cidade = new Cidade();
-        if($cidadeId)
-            $cidade->setCodigoIbge($cidadeId);
-        else
-            $cidade->setCodigoIbge(null);
-        $cidade->setEstado(new Estado());
-        $cidade->getEstado()->setCodigoUf($estadoId);
-        $usuario->setCidade($cidade);
-
-        $usuario->setEndLogradouro($endLogradouro);
-        $usuario->setEndBairro($endBairro);
-        $usuario->setEndNumero($endNumero);
+        $senhaHash = password_hash($senha, PASSWORD_DEFAULT);
+        $usuarioAuth->setSenha($senha);
         $usuario->setTelefone($telefone);
-        if($usuario->getTipoUsuario() != null && $usuario->getTipoUsuario()->getId() == TipoUsuario::ID_EMPRESA)
-            $usuario->setStatus(Status::PENDENTE);
-        else
-            $usuario->setStatus(Status::ATIVO);
+        $usuario->setStatus(Status::ATIVO);
+
+        $usuarioAuth->setUsuario($usuario);
         
         //Validar os dados
-        $erros = $this->usuarioService->validarDados($usuario, $confSenha);
+        $erros = $this->usuarioService->validarSenha($senha);
         if(empty($erros)){
-            if($usuario->getTipoUsuario()->getId() == TipoUsuario::ID_CANDIDATO){
-                if (! $this->usuarioService->validarCPF($usuario->getDocumento())) {
-                    array_push($erros, "O CPF informado é inválido.");
-                }
-                
-            }
+            $erros = $this->usuarioService->validarDados($usuarioAuth, $confSenha);
             if(empty($erros)){
-            $erros = array_merge($erros,$this->usuarioService->validarDocumento($usuario->getDocumento()));
-            $erros = array_merge($erros,$this->usuarioService->validarEmail($usuario->getEmail()));
+                $usuarioAuth->setSenha($senhaHash);
+                if(empty($erros)){
+                $erros = array_merge($erros,$this->usuarioService->validarEmail($usuario->getEmail()));
+                }
             }
         }
         if(empty($erros)) {
@@ -111,29 +75,25 @@ class CadastroController extends Controller {
             try {
                 $this->usuarioDao->insert($usuario);
                
-                $usuario = $this->usuarioDao->findByLoginSenha($usuario->getEmail(),$usuario->getSenha());  
-                if($usuario->getStatus == Status::ATIVO){                  
-                    $this->loginService->salvarUsuarioSessao($usuario);
+                $usuarioSalvo = $this->usuarioDao->findByEmail($email);
+
+                if (!$usuarioSalvo) {
+                    throw new Exception("Erro ao recuperar usuário");
+                }     
+
+                $usuarioAuth->setUsuario($usuarioSalvo);
+                $usuarioAuth->setProvider('LOCAL');
+                $usuarioAuth->setProvider_id(null);
+
+                $this->usuarioAuthDao->inserir($usuarioAuth);
+                $_SESSION[SESSAO_USUARIO_ID] = $usuarioSalvo->getId();
                     
-                    // Redireciona baseado no tipo de usuário
-                    switch ($usuario->getTipoUsuario()->getId()) {
-                        case TipoUsuario::ID_CANDIDATO: 
-                            header("location: " . BASEURL . "/controller/VagaController.php?action=minhasCandidaturas");
-                            break;
-                        case TipoUsuario::ID_ADMINISTRADOR:
-                            header("location: " . BASEURL . "/controller/HomeController.php?action=dashboard");
-                            break;
-                        case TipoUsuario::ID_EMPRESA:
-                            header("location: " . BASEURL . "/controller/EmpresaController.php?action=home");
-                            break;
-                        default:
-                            header("location: " . HOME_PAGE);
-                    }
-                
-                    exit;
-                } else {header("location: " . HOME_PAGE);}
+                header("Location: " . BASEURL . "/view/usuario/select_tipo_usuario.php");
+                exit;
+                  
             } catch (PDOException $e) {
-                $erros = ["Erro ao salvar o usuário na base de dados."];                
+                header("Location: " . BASEURL . "/view/usuario/select_tipo_usuario.php?erro=Erro ao salvar");
+                exit;            
             }
         }
 
@@ -144,11 +104,49 @@ class CadastroController extends Controller {
         
         $dados["usuario"] = $usuario;
         $dados["confSenha"] = $confSenha;
-        $dados["estados"] = $this->estadoDAO->list();
-        $dados["papeis"] = $this->tipoUsuarioDAO->listSemADM();
-
+   
         $msgsErro = is_array($erros) ? implode("<br>", $erros) : $erros;
-        $this->loadView("usuario/form_cadastro.php", $dados, $msgsErro);
+        $this->loadView("usuario/form_usuario.php", $dados, $msgsErro);
+    }
+
+    protected function definirTipo(){
+        
+        $tipoUsuario = $_POST['tipo'] ?? null;
+
+        if (isset($_SESSION[SESSAO_USUARIO_PAPEL])) {
+            header('location: ' . HOME_PAGE);
+            exit;
+        }
+
+        if (!$tipoUsuario) {
+            header("Location: " . BASEURL . "/view/usuario/select_tipo_usuario.php?erro=Selecione um tipo");
+            exit;
+        }
+
+        try{
+            $usuario = $this->usuarioDao->findById($_SESSION[SESSAO_USUARIO_ID]);
+            
+            $usuario->setTipoUsuario($tipoUsuario);
+            $this->usuarioDao->definirTipo($usuario);
+            //$resultado = $this->loginService->PosLogin($usuario);
+            //if (isset($resultado['erro'])) {
+                //header("Location: " . $resultado['redirect'] . "&msg=" . urlencode($resultado['erro']));
+                //exit;
+            //}
+            $this->loginService->salvarUsuarioSessao($usuario);
+            //header("Location: " . $resultado['redirect']);
+            if($tipoUsuario == TipoUsuario::EMPRESA){
+                header("Location: " . BASEURL . "/controller/EmpresaController.php?action=form");
+                exit;
+            }
+            elseif($tipoUsuario == TipoUsuario::CANDIDATO){
+                header("Location: " . BASEURL . "/controller/HomeController.php?action=form");
+                exit;
+            }
+
+        }catch(PDOException $e) {
+                $erros = ["Erro ao salvar o usuário na base de dados."];                
+        }
     }
 
 

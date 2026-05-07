@@ -1,3 +1,4 @@
+
 <?php
 
 ini_set('display_errors', 1);
@@ -5,6 +6,7 @@ ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
 
 require_once(__DIR__ . "/Controller.php");
+require_once(__DIR__ . "/../model/enum/TipoUsuario.php");
 require_once(__DIR__ . "/../dao/VagaDAO.php");
 require_once(__DIR__ . "/../dao/CategoriaDAO.php");
 require_once(__DIR__ . "/../dao/UsuarioDAO.php");
@@ -34,13 +36,13 @@ class HomeController extends Controller {
         // Redireciona empresas para sua home específica
         if (isset($_SESSION[SESSAO_USUARIO_PAPEL])) {
             switch ($_SESSION[SESSAO_USUARIO_PAPEL]) {
-                case 2: // Administrador
+                case TipoUsuario::ADMINISTRADOR: // Administrador
                     if (!isset($_GET['action']) || $_GET['action'] !== 'home') {
                         header("location: " . BASEURL . "/controller/AdminController.php?action=home");
                         exit;
                     }
                     break;
-                case 3: // Empresa
+                case TipoUsuario::EMPRESA: // Empresa
                     header("location: " . BASEURL . "/controller/EmpresaController.php?action=home");
                     exit;
             }
@@ -80,6 +82,11 @@ class HomeController extends Controller {
         ];
 
         $this->loadView("admin/dashboard.php", $dados);
+    }
+
+    protected function form(){
+        $this->loadView("usuario/form_candidato.php",[]);
+        exit;
     }
 
 }

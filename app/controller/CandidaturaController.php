@@ -1,10 +1,13 @@
 <?php 
-require_once(__DIR__ . "/../dao/UsuarioDAO.php");
-require_once(__DIR__ . "/../dao/VagaDAO.php");
 require_once(__DIR__ . "/Controller.php");
 require_once(__DIR__ . "/../dao/CandidaturaDAO.php");
+require_once(__DIR__ . "/../dao/CandidatoDAO.php");
+require_once(__DIR__ . "/../dao/UsuarioDAO.php");
+require_once(__DIR__ . "/../dao/VagaDAO.php");
+require_once(__DIR__ . "/../dao/ExperienciaDAO.php");
+require_once(__DIR__ . "/../dao/FormacaoDAO.php");
 require_once (__DIR__ . "/../model/enum/StatusCandidatura.php");
-require_once(__DIR__ . "/../model/TipoUsuario.php");
+
 
 
 
@@ -12,7 +15,10 @@ class CandidaturaController extends Controller {
  
     private VagaDAO $vagaDao;
     private UsuarioDAO $usuarioDao;
+    private CandidatoDAO $candidatoDao;
     private CandidaturaDAO $candidaturaDao;
+    private ExperienciaDAO $experienciaDao;
+    private FormacaoDAO $formacaoDao;
 
 
     public function __construct()
@@ -20,10 +26,12 @@ class CandidaturaController extends Controller {
         if(! $this->usuarioLogado())
             exit;
 
-        //Criar os DAOS
         $this->vagaDao = new VagaDAO();
-        $this->usuarioDao = new UsuarioDAO();
+        $this->candidatoDao = new CandidatoDAO();
         $this->candidaturaDao = new CandidaturaDAO();
+        $this->usuarioDao = new UsuarioDAO();
+        $this->experienciaDao = new ExperienciaDAO();
+        $this->formacaoDao = new FormacaoDAO();
         $this -> handleAction();
     }
 
@@ -37,7 +45,7 @@ class CandidaturaController extends Controller {
         } 
 
         $candidatoId = $_SESSION[SESSAO_USUARIO_ID];
-        $candidato = $this->usuarioDao->findById($candidatoId);
+        $candidato = $this->candidatoDao->findByUsuarioId($candidatoId);
 
 
         /*
@@ -50,7 +58,7 @@ class CandidaturaController extends Controller {
 
         */
 
-        if($candidato->getTipoUsuario()->getId() == TipoUsuario::ID_CANDIDATO){
+        if($_SESSION[SESSAO_USUARIO_PAPEL] == TipoUsuario::CANDIDATO){
             $candidatura = new Candidatura();
             $candidatura->setCandidato($candidato)
                     ->setVaga($vaga)
@@ -71,7 +79,7 @@ class CandidaturaController extends Controller {
 
     protected function listarCandidatos(string $msgErro = "", string $msgSucesso = "") {
         // Verifica se é uma empresa
-        if ($_SESSION[SESSAO_USUARIO_PAPEL] != TipoUsuario::ID_EMPRESA) {
+        if ($_SESSION[SESSAO_USUARIO_PAPEL] != TipoUsuario::EMPRESA) {
             header("location: " . BASEURL . "/controller/VagaController.php?action=listPublic");
             exit;
         }
@@ -83,7 +91,7 @@ class CandidaturaController extends Controller {
         }
 
         // Verifica se a vaga pertence à empresa logada
-        if ($vaga->getEmpresa()->getId() != $_SESSION[SESSAO_USUARIO_ID]) {
+        if ($vaga->getEmpresa()->getUsuario_id() != $_SESSION[SESSAO_USUARIO_ID]) {
             header("location: " . BASEURL . "/controller/VagaController.php?action=list");
             exit;
         }
@@ -105,8 +113,8 @@ class CandidaturaController extends Controller {
     }
 
     protected function viewCandidato() {
-        // Only companies can view candidate profiles
-        if ($_SESSION[SESSAO_USUARIO_PAPEL] != TipoUsuario::ID_EMPRESA) {
+        // Apenas empresas podem ver perfil de candidatos
+        if ($_SESSION[SESSAO_USUARIO_PAPEL] != TipoUsuario::EMPRESA) {
             header("location: " . BASEURL . "/controller/VagaController.php?action=listPublic");
             exit;
         }
@@ -116,14 +124,20 @@ class CandidaturaController extends Controller {
             exit;
         }
 
-        $candidato = $this->usuarioDao->findById($_GET['id']);
+        $candidato = $this->candidatoDao->findByUsuarioId($_GET['id']);
+        $experiencia = $this->experienciaDao->findByUsuarioId($_GET['id']);
+        $formacao = $this->formacaoDao->findByUsuarioId($_GET['id']);
         if (!$candidato) {
             header("location: " . BASEURL . "/controller/VagaController.php?action=list");
             exit;
         }
 
-        $dados['candidato'] = $candidato;
-        $this->loadView("usuario/perfil_candidato.php", $dados);
+        $dados['usuario'] = $candidato;
+        $dados['experiencias'] = $experiencia;
+        $dados['formacoes'] = $formacao;
+        $dados["isOwnProfile"] = ($_GET['id'] == $_SESSION[SESSAO_USUARIO_ID]);
+
+        $this->loadView("usuario/profile.php", $dados);
     }
 
 }

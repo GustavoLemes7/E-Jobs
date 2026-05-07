@@ -4,6 +4,7 @@ include_once(__DIR__ . "/../connection/Connection.php");
 include_once(__DIR__ . "/../model/Vaga.php");
 include_once(__DIR__ . "/../model/enum/Salario.php");
 include_once(__DIR__ . "/../dao/UsuarioDAO.php");
+include_once(__DIR__ . "/../dao/EmpresaDAO.php");
 include_once(__DIR__ . "/../dao/CargoDAO.php");
 include_once(__DIR__ . "/../dao/CategoriaDAO.php");
 
@@ -11,6 +12,7 @@ class VagaDAO
 {
 
     private UsuarioDAO $usuarioDao;
+    private EmpresaDAO $empresaDao;
     private CargoDAO $cargoDao;
     private CategoriaDAO $categoriaDao;
 
@@ -18,6 +20,7 @@ class VagaDAO
     {
 
         $this->usuarioDao = new UsuarioDAO();
+        $this->empresaDao = new EmpresaDAO();
         $this->cargoDao = new CargoDAO();
         $this->categoriaDao = new CategoriaDAO();
     }
@@ -26,7 +29,7 @@ class VagaDAO
     {
         $conn = Connection::getConn();
 
-        $sql = "SELECT * FROM vaga v ORDER BY v.titulo";
+        $sql = "SELECT * FROM vagas v ORDER BY v.titulo";
         $stm = $conn->prepare($sql);
         $stm->execute();
         $result = $stm->fetchAll();
@@ -38,8 +41,8 @@ class VagaDAO
     {
         $conn = Connection::getConn();
 
-        $sql = "SELECT v.* FROM vaga v 
-                JOIN usuario u ON v.empresa_id = u.id
+        $sql = "SELECT v.* FROM vagas v 
+                JOIN usuarios u ON v.empresa_id = u.id
                 WHERE v.status = 'Ativo'";
 
         if ($idCategoria > 0)
@@ -97,8 +100,8 @@ class VagaDAO
     {
         $conn = Connection::getConn();
 
-        $sql = "SELECT COUNT(*) as total FROM vaga v 
-            JOIN usuario u ON v.empresa_id = u.id
+        $sql = "SELECT COUNT(*) as total FROM vagas v 
+            JOIN usuarios u ON v.empresa_id = u.id
             WHERE v.status = 'Ativo'";
 
         if (!empty($search))
@@ -148,7 +151,7 @@ class VagaDAO
     {
         $conn = Connection::getConn();
 
-        $sql = "SELECT * FROM vaga v" .
+        $sql = "SELECT * FROM vagas v" .
             " WHERE v.empresa_id = ?";
         $stm = $conn->prepare($sql);
         $stm->execute([$id]);
@@ -167,7 +170,7 @@ class VagaDAO
     {
         $conn = Connection::getConn();
 
-        $sql = "SELECT * FROM vaga v" .
+        $sql = "SELECT * FROM vagas v" .
             " WHERE v.id = ?";
         $stm = $conn->prepare($sql);
         $stm->execute([$id]);
@@ -190,7 +193,7 @@ class VagaDAO
     {
         $conn = Connection::getConn();
 
-        $sql = "INSERT INTO vaga (titulo, modalidade, horario, regime,
+        $sql = "INSERT INTO vagas (titulo, modalidade, horario, regime,
          salario, descricao, requisitos, status, empresa_id, cargos_id, categoria_id)" .
             " VALUES (:titulo, :modalidade, :horario, :regime, :salario,
                :descricao, :requisitos, :status, :empresa_id, :cargos_id, :categoria_id)";
@@ -204,7 +207,7 @@ class VagaDAO
         $stm->bindValue("descricao", $vaga->getDescricao());
         $stm->bindValue("requisitos", $vaga->getRequisitos());
         $stm->bindValue("status", $vaga->getStatus());
-        $stm->bindValue("empresa_id", $vaga->getEmpresa()->getId());
+        $stm->bindValue("empresa_id", $vaga->getEmpresa()->getUsuario_id());
         $stm->bindValue("cargos_id", $vaga->getCargo()->getId());
         $stm->bindValue("categoria_id", $vaga->getCategoria()->getId());
 
@@ -216,7 +219,7 @@ class VagaDAO
     {
         $conn = Connection::getConn();
 
-        $sql = "UPDATE vaga SET titulo = :titulo, modalidade = :modalidade," .
+        $sql = "UPDATE vagas SET titulo = :titulo, modalidade = :modalidade," .
             " horario = :horario, regime = :regime, salario = :salario, descricao = :descricao," .
             " requisitos = :requisitos, status = :status, empresa_id = :empresa_id, cargos_id = :cargos_id, categoria_id = :categoria_id" .
             " WHERE id = :id";
@@ -230,7 +233,7 @@ class VagaDAO
         $stm->bindValue("descricao", $vaga->getDescricao());
         $stm->bindValue("requisitos", $vaga->getRequisitos());
         $stm->bindValue("status", $vaga->getStatus());
-        $stm->bindValue("empresa_id", $vaga->getEmpresa()->getId());
+        $stm->bindValue("empresa_id", $vaga->getEmpresa()->getUsuario_id());
         $stm->bindValue("cargos_id", $vaga->getCargo()->getId());
         $stm->bindValue("categoria_id", $vaga->getCategoria()->getId());
         $stm->bindValue("id", $vaga->getId());
@@ -252,7 +255,7 @@ class VagaDAO
     {
         $conn = Connection::getConn();
 
-        $sql = "UPDATE vaga SET status = 'Inativo'" .
+        $sql = "UPDATE vagas SET status = 'Inativo'" .
             " WHERE id = :id";
 
         $stm = $conn->prepare($sql);
@@ -264,7 +267,7 @@ class VagaDAO
     {
         $conn = Connection::getConn();
 
-        $sql = "SELECT * FROM vaga v WHERE LOWER(v.titulo) LIKE LOWER(:title) ORDER BY v.titulo";
+        $sql = "SELECT * FROM vagas v WHERE LOWER(v.titulo) LIKE LOWER(:title) ORDER BY v.titulo";
         $stm = $conn->prepare($sql);
         $stm->bindValue("title", "%" . $title . "%");
         $stm->execute();
@@ -277,7 +280,7 @@ class VagaDAO
     {
         $conn = Connection::getConn();
 
-        $sql = "SELECT * FROM vaga v WHERE v.status = :status ORDER BY v.titulo";
+        $sql = "SELECT * FROM vagas v WHERE v.status = :status ORDER BY v.titulo";
         $stm = $conn->prepare($sql);
         $stm->bindValue("status", $status);
         $stm->execute();
@@ -290,7 +293,7 @@ class VagaDAO
     {
         $conn = Connection::getConn();
 
-        $sql = "SELECT * FROM vaga v WHERE v.status = :status AND v.empresa_id = :empresa_id ORDER BY v.titulo";
+        $sql = "SELECT * FROM vagas v WHERE v.status = :status AND v.empresa_id = :empresa_id ORDER BY v.titulo";
         $stm = $conn->prepare($sql);
         $stm->bindValue("status", $status);
         $stm->bindValue("empresa_id", $empresaId);
@@ -304,7 +307,7 @@ class VagaDAO
     {
         $conn = Connection::getConn();
 
-        $sql = "SELECT * FROM vaga v WHERE v.status = 'Ativo' ORDER BY v.titulo";
+        $sql = "SELECT * FROM vagas v WHERE v.status = 'Ativo' ORDER BY v.titulo";
         $stm = $conn->prepare($sql);
         $stm->execute();
         $result = $stm->fetchAll();
@@ -327,8 +330,8 @@ class VagaDAO
             $vaga->setSalario($reg['salario']);
             $vaga->setDescricao($reg['descricao']);
             $vaga->setRequisitos($reg['requisitos']);
-            $vaga->setStatus($reg['status']);
-            $vaga->setEmpresa($this->usuarioDao->findById($reg['empresa_id']));
+            $vaga->setStatus($reg['status']);  
+            $vaga->setEmpresa($this->empresaDao->findByUsuarioId($reg['empresa_id']));
             $vaga->setCargo($this->cargoDao->findById($reg['cargos_id']));
             $vaga->setCategoria($this->categoriaDao->findById($reg['categoria_id']));
             array_push($vagas, $vaga);
@@ -341,7 +344,7 @@ class VagaDAO
     {
         $conn = Connection::getConn();
 
-        $sql = "SELECT * FROM vaga v WHERE v.status = 'Ativo' ";
+        $sql = "SELECT * FROM vagas v WHERE v.status = 'Ativo' ";
         $params = [];
 
         if (!empty($search)) {

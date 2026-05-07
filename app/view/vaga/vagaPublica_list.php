@@ -34,8 +34,6 @@ require_once(__DIR__ . "/../include/menu.php");
 </style>
 <link rel="stylesheet" href="/app/view/vaga/vaga.css"> 
 
-<h3 class="text-center">Vagas</h3>
-
 <?php if (!empty($dados['search_term'])): ?>
     <h5 class="text-center">Resultados para: "<?= htmlspecialchars($dados['search_term']) ?>"</h5>
 <?php endif; ?>
@@ -156,7 +154,7 @@ require_once(__DIR__ . "/../include/menu.php");
                                 <div class="d-flex align-items-center mb-2">
                                     <i class="fas fa-building vaga-icon"></i>
                                     <span class="vaga-label">Empresa:</span>
-                                    <span class="vaga-info ms-1"> <?= htmlspecialchars($vaga->getEmpresa()->getNome()); ?> </span>
+                                    <span class="vaga-info ms-1"> <?= htmlspecialchars($vaga->getEmpresa()->getNomeFantasia()); ?> </span>
                                 </div>
                                 <div class="d-flex align-items-center mb-1">
                                     <i class="fas fa-laptop-house vaga-icon"></i>

@@ -2,9 +2,9 @@
 
 class Status{
     
-    const ATIVO = "Ativo";
-    const INATIVO = "Inativo";
-    const PENDENTE = "Pendente";
+    const ATIVO = "ATIVO";
+    const INATIVO = "INATIVO";
+    const PENDENTE = "PENDENTE";
 
     public static function getAllAsArray() {
         return [Status::ATIVO, Status::INATIVO];

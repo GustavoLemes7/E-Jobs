@@ -40,7 +40,16 @@ require_once(__DIR__ . "/../include/menu.php");
         </form>
 
         <div class="login-footer">
-            <p>Não tem uma conta? <a href="<?= BASEURL ?>/controller/CadastroController.php?action=create">Cadastre-se</a></p>
+            <p>Não tem uma conta? <a href="<?= BASEURL ?>/controller/CadastroController.php?action=createFormUsuario">Cadastre-se</a></p>
+        </div>
+
+        <div class="divider">
+            <span>ou</span>
+        </div>
+
+        <div id="customBtn" class="google-btn">
+            <img src="https://developers.google.com/identity/images/g-logo.png" class="google-icon">
+            <span>Entrar com Google</span>
         </div>
     </div>
 </div>
@@ -48,3 +57,9 @@ require_once(__DIR__ . "/../include/menu.php");
 <?php  
 require_once(__DIR__ . "/../include/footer.php");
 ?>
+
+<script>
+document.getElementById("customBtn").addEventListener("click", function() {
+    window.location.href = "<?= BASEURL ?>/auth/google_login.php";
+});
+</script>

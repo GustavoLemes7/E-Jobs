@@ -30,7 +30,7 @@ require_once(__DIR__ . "/../include/menu.php");
                             <?php foreach ($dados["lista"] as $candidatura): ?>
                                 <tr>
                                     <td><?= htmlspecialchars($candidatura->getVaga()->getTitulo()) ?></td>
-                                    <td><?= htmlspecialchars($candidatura->getVaga()->getEmpresa()->getNome()) ?></td>
+                                    <td><?= htmlspecialchars($candidatura->getVaga()->getEmpresa()->getNomeFantasia()) ?></td>
                                     <td><?= htmlspecialchars($candidatura->getVaga()->getCargo()->getNome()) ?></td>
                                     <td><?= date('d/m/Y H:i', strtotime($candidatura->getDataCandidatura())) ?></td>
                                     <td>

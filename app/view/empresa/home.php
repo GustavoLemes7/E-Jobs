@@ -7,7 +7,7 @@ require_once(__DIR__ . "/../include/menu.php");
 
 <div class="container py-4">
     <div class="welcome-section">
-        <h1 class="welcome-title">Bem-vindo(a), <?= htmlspecialchars($dados['empresa']->getNome()) ?>!</h1>
+        <h1 class="welcome-title">Bem-vindo(a), <?= htmlspecialchars($dados['empresa']->getNomeFantasia()) ?>!</h1>
         <p class="welcome-subtitle">Gerencie suas vagas de forma eficiente</p>
     </div>
 

@@ -1,5 +1,7 @@
 <?php
 require_once(__DIR__ . "/Controller.php");
+require_once(__DIR__ . "/../model/enum/TipoUsuario.php");
+require_once(__DIR__ . "/../model/Usuario.php");
 require_once(__DIR__ . "/../dao/UsuarioDAO.php");
 require_once(__DIR__ . "/../dao/CategoriaDAO.php");
 require_once(__DIR__ . "/../dao/CargoDAO.php");
@@ -23,7 +25,7 @@ class AdminController extends Controller {
         if (session_status() !== PHP_SESSION_ACTIVE) {
             session_start();
         }
-        if (!isset($_SESSION['usuario']) || $_SESSION['usuario']->getTipoUsuario()->getId() != 2) {
+        if (!isset($_SESSION['usuario']) || $_SESSION[SESSAO_USUARIO_PAPEL] != TipoUsuario::ADMINISTRADOR) {
             header('location: ' . HOME_PAGE);
         }
         $dados = [

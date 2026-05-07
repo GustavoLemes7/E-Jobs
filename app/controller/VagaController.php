@@ -7,6 +7,7 @@ require_once(__DIR__ . "/../dao/CategoriaDAO.php");
 require_once(__DIR__ . "/../dao/CandidaturaDAO.php");
 require_once(__DIR__ . "/../service/VagaService.php");
 require_once(__DIR__ . "/../model/Vaga.php");
+require_once(__DIR__ . "/../model/Empresa.php");
 require_once(__DIR__ . "/../model/Candidatura.php");
 require_once(__DIR__ . "/../model/enum/Modalidade.php");
 require_once(__DIR__ . "/../model/enum/Regime.php");
@@ -176,7 +177,7 @@ class VagaController extends Controller
             $dados["status"] = Status::getAllAsArray();
             $dados["cargos"] = $this->cargoDao->list();
             $dados["categorias"] = $this->categoriaDao->list();
-            $dados["empresa"] = $this->usuarioDao->findById($vaga->getEmpresa()->getId());
+            $dados["empresa"] = $this->usuarioDao->findById($vaga->getEmpresa()->getUsuario_id());
 
             $this->loadView("vaga/vaga_form.php", $dados);
         } else
@@ -218,6 +219,8 @@ class VagaController extends Controller
         $vaga->setStatus($status);
         $vaga->setCargo($cargo);
         $vaga->setCategoria($categoria);
+        $empresa = new Empresa();
+        $empresa->setUsuario_id($usuarioId);
         $vaga->setEmpresa($empresa);
         
 
@@ -251,7 +254,7 @@ class VagaController extends Controller
         $dados["horarios"] = Horario::getAllAsArray();
         $dados["regimes"] = Regime::getAllAsArray();
         $dados["cargos"] = $this->cargoDao->list();
-        $dados["empresa"] = $this->usuarioDao->findById($vaga->getEmpresa()->getId());
+        $dados["empresa"] = $this->usuarioDao->findById($vaga->getEmpresa()->getUsuario()->getId());
 
         $msgsErro = is_array($erros) ? implode("<br>", $erros) : $erros;
         $this->loadView("vaga/vaga_form.php", $dados, $msgsErro);

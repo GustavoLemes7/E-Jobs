@@ -1,4 +1,3 @@
-use ejobs;
 CREATE TABLE cidades(
     codigo_ibge INT NOT NULL,
     nome VARCHAR(100) NOT NULL,

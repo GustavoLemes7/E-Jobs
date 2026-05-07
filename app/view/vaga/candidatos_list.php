@@ -28,6 +28,7 @@ require_once(__DIR__ . "/../include/menu.php");
                         <tr>
                             <th>Nome</th>
                             <th>Email</th>
+                            <th>Telefone</th>
                             <th>Data da Candidatura</th>
                             <th>Perfil</th>
                         </tr>
@@ -35,12 +36,13 @@ require_once(__DIR__ . "/../include/menu.php");
                     <tbody>
                         <?php foreach($dados['lista'] as $candidatura): ?>
                             <tr>
-                                <td><?= htmlspecialchars($candidatura->getCandidato()->getNome()) ?></td>
-                                <td><?= htmlspecialchars($candidatura->getCandidato()->getEmail()) ?></td>
+                                <td><?= htmlspecialchars($candidatura->getCandidato()->getNomeCompleto()) ?></td>
+                                <td><?= htmlspecialchars($candidatura->getCandidato()->getEmailContato()) ?></td>
+                                <td><?= htmlspecialchars($candidatura->getCandidato()->getTelefoneContato()) ?></td>
                                 <td><?= date('d/m/Y', strtotime($candidatura->getDataCandidatura())) ?></td>
                                 <td>
                                     <a class="btn btn-info" 
-                                        href="<?= BASEURL ?>/controller/CandidaturaController.php?action=viewCandidato&id=<?= $candidatura->getCandidato()->getId() ?>">
+                                        href="<?= BASEURL ?>/controller/CandidaturaController.php?action=viewCandidato&id=<?= $candidatura->getCandidato()->getUsuario_id() ?>">
                                         <i class="fas fa-user"></i> Visualizar Perfil
                                     </a>
                                 </td>

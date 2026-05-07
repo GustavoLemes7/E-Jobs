@@ -1,0 +1,5 @@
+/.env
+/vendor/
+/public/uploads/curriculos
+/public/uploads/fotos
+/public/uploads/logos
