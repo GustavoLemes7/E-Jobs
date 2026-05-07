@@ -1,5 +1,11 @@
 /.env
 /vendor/
-/public/uploads/curriculos
-/public/uploads/fotos
-/public/uploads/logos
+
+/public/uploads/curriculos/*
+!/public/uploads/curriculos/.gitkeep
+
+/public/uploads/fotos/*
+!/public/uploads/fotos/.gitkeep
+
+/public/uploads/logos/*
+!/public/uploads/logos/.gitkeep
